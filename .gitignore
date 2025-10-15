@@ -1,0 +1,61 @@
+# ZiXiao Git Server
+
+# Build artifacts
+bin/
+data/
+logs/
+*.db
+*.log
+
+# C++ build artifacts
+*.o
+*.so
+*.dylib
+*.a
+git-core/lib/
+git-core/build*/
+git-core/xcode-project/
+
+# Go build artifacts
+vendor/
+
+# IDE
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.swp
+*.swo
+*~
+
+# Xcode
+*.xcodeproj
+*.xcworkspace
+xcuserdata/
+DerivedData/
+*.moved-aside
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+
+# Visual Studio / VS Code
+.vs/
+*.code-workspace
+
+# CLion
+cmake-build-*/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Config
+configs/server.yaml.local
+

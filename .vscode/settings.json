@@ -1,0 +1,46 @@
+{
+  "go.buildOnSave": "workspace",
+  "go.lintOnSave": "workspace",
+  "go.formatTool": "goimports",
+  "go.useLanguageServer": true,
+  "gopls": {
+    "analyses": {
+      "unusedparams": true,
+      "shadow": true
+    },
+    "staticcheck": true
+  },
+  "C_Cpp.default.includePath": [
+    "${workspaceFolder}/git-core/include",
+    "/opt/homebrew/opt/openssl/include",
+    "/usr/local/opt/openssl/include"
+  ],
+  "C_Cpp.default.compilerPath": "/usr/bin/g++",
+  "C_Cpp.default.cppStandard": "c++17",
+  "C_Cpp.default.intelliSenseMode": "macos-gcc-x64",
+  "files.exclude": {
+    "**/*.o": true,
+    "**/bin": true,
+    "**/git-core/lib": true,
+    "**/*.db": true
+  },
+  "files.watcherExclude": {
+    "**/bin/**": true,
+    "**/git-core/lib/**": true,
+    "**/data/**": true,
+    "**/logs/**": true
+  },
+  "[go]": {
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": true
+    }
+  },
+  "[cpp]": {
+    "editor.formatOnSave": true
+  },
+  "terminal.integrated.env.osx": {
+    "CGO_CFLAGS": "-I${workspaceFolder}/git-core/include",
+    "CGO_LDFLAGS": "-L${workspaceFolder}/git-core/lib -lgitcore"
+  }
+}

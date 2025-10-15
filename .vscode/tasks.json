@@ -1,0 +1,50 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build All",
+      "type": "shell",
+      "command": "make build",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": ["$gcc", "$go"]
+    },
+    {
+      "label": "Build C++ Only",
+      "type": "shell",
+      "command": "make build-cpp",
+      "problemMatcher": "$gcc"
+    },
+    {
+      "label": "Build Go Only",
+      "type": "shell",
+      "command": "make build-go",
+      "problemMatcher": "$go"
+    },
+    {
+      "label": "Run Server",
+      "type": "shell",
+      "command": "make run",
+      "isBackground": true
+    },
+    {
+      "label": "Clean",
+      "type": "shell",
+      "command": "make clean"
+    },
+    {
+      "label": "Run Tests",
+      "type": "shell",
+      "command": "./scripts/test.sh",
+      "problemMatcher": []
+    },
+    {
+      "label": "Run API Tests",
+      "type": "shell",
+      "command": "./scripts/api-test.sh",
+      "problemMatcher": []
+    }
+  ]
+}

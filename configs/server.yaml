@@ -1,0 +1,28 @@
+server:
+  host: 0.0.0.0
+  port: 8080
+  mode: release  # debug or release
+
+database:
+  type: sqlite
+  path: ./data/gitserver.db
+  # For PostgreSQL or MySQL:
+  # type: postgres
+  # host: localhost
+  # port: 5432
+  # name: gitserver
+  # user: postgres
+  # password: password
+
+git:
+  repo_path: ./data/repositories
+  max_repo_size: 1024  # MB
+  max_file_size: 100   # MB
+  allowed_types: []    # Empty = allow all
+
+security:
+  jwt_secret: CHANGE_ME_IN_PRODUCTION_USE_RANDOM_STRING
+  jwt_expiration: 24   # hours
+  password_min: 8
+  enable_ssh: false
+  ssh_port: 2222

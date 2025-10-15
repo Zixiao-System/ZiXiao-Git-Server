@@ -1,0 +1,26 @@
+server:
+  host: "0.0.0.0"
+  port: 8080
+  domain: "localhost"
+
+database:
+  type: "sqlite3"
+  path: "./data/zixiao.db"
+
+repository:
+  root: "./data/repositories"
+
+git:
+  # C++ Git核心程序路径
+  git_core_path: "./git-core/build/git-core"
+  enable_http: true
+  enable_ssh: true
+  ssh_port: 2222
+
+security:
+  jwt_secret: "change-this-in-production"
+  session_timeout: 3600
+
+log:
+  level: "info"
+  path: "./logs/server.log"
