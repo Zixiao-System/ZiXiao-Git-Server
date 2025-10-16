@@ -42,6 +42,63 @@ fi
 CXX_VERSION=$(g++ --version | head -n1)
 echo "✓ C++ compiler found: $CXX_VERSION"
 
+# Check for Node.js and npm
+if ! command -v node &> /dev/null; then
+    echo "WARNING: Node.js is not installed"
+    echo "Installing Node.js..."
+    if [ "$OS" = "Darwin" ]; then
+        if command -v brew &> /dev/null; then
+            brew install node
+        else
+            echo "ERROR: Homebrew is not installed. Please install Node.js from https://nodejs.org/"
+            exit 1
+        fi
+    else
+        echo "Please install Node.js 18+ from https://nodejs.org/"
+        exit 1
+    fi
+fi
+
+NODE_VERSION=$(node --version)
+echo "✓ Node.js found: $NODE_VERSION"
+
+if ! command -v npm &> /dev/null; then
+    echo "ERROR: npm is not installed"
+    exit 1
+fi
+
+NPM_VERSION=$(npm --version)
+echo "✓ npm found: $NPM_VERSION"
+
+# Check for Nginx
+if ! command -v nginx &> /dev/null; then
+    echo "WARNING: Nginx is not installed"
+    echo "Installing Nginx..."
+    if [ "$OS" = "Darwin" ]; then
+        if command -v brew &> /dev/null; then
+            brew install nginx
+        else
+            echo "ERROR: Homebrew is not installed"
+            echo "Please install Homebrew from https://brew.sh/"
+            exit 1
+        fi
+    else
+        # Linux
+        if command -v apt-get &> /dev/null; then
+            sudo apt-get update
+            sudo apt-get install -y nginx
+        elif command -v yum &> /dev/null; then
+            sudo yum install -y nginx
+        else
+            echo "ERROR: Package manager not found. Please install Nginx manually."
+            exit 1
+        fi
+    fi
+fi
+
+NGINX_VERSION=$(nginx -v 2>&1 | awk -F'/' '{print $2}')
+echo "✓ Nginx found: $NGINX_VERSION"
+
 # Check for OpenSSL
 if [ "$OS" = "Darwin" ]; then
     if [ ! -d "/opt/homebrew/opt/openssl" ] && [ ! -d "/usr/local/opt/openssl" ]; then
@@ -86,6 +143,14 @@ echo "Installing Go dependencies..."
 go mod download
 echo "✓ Go dependencies installed"
 
+# Install frontend dependencies
+echo ""
+echo "Installing frontend dependencies..."
+cd frontend
+npm install
+echo "✓ Frontend dependencies installed"
+cd ..
+
 # Create directories
 echo ""
 echo "Creating directories..."
@@ -93,6 +158,7 @@ mkdir -p data/repositories
 mkdir -p logs
 mkdir -p bin
 mkdir -p git-core/lib
+mkdir -p web/dist
 echo "✓ Directories created"
 
 # Create default config if it doesn't exist
@@ -125,6 +191,55 @@ EOF
     echo "  IMPORTANT: Update the jwt_secret in production!"
 fi
 
+# Configure Nginx
+echo ""
+echo "Configuring Nginx..."
+
+PROJECT_ROOT=$(pwd)
+
+# Create local Nginx config with project path
+sed "s|__PROJECT_ROOT__|$PROJECT_ROOT|g" configs/nginx-local.conf > configs/nginx-local-generated.conf
+
+if [ "$OS" = "Darwin" ]; then
+    # macOS Homebrew Nginx
+    NGINX_CONF_DIR="/opt/homebrew/etc/nginx"
+    if [ ! -d "$NGINX_CONF_DIR" ]; then
+        NGINX_CONF_DIR="/usr/local/etc/nginx"
+    fi
+
+    if [ -d "$NGINX_CONF_DIR/servers" ]; then
+        echo "Creating Nginx configuration symlink..."
+        ln -sf "$PROJECT_ROOT/configs/nginx-local-generated.conf" "$NGINX_CONF_DIR/servers/zixiao-git-server.conf"
+        echo "✓ Nginx configuration linked"
+    else
+        echo "WARNING: Nginx servers directory not found"
+        echo "Please manually copy configs/nginx-local-generated.conf to your Nginx configuration"
+    fi
+else
+    # Linux
+    NGINX_CONF_DIR="/etc/nginx"
+    if [ -d "$NGINX_CONF_DIR/sites-available" ]; then
+        echo "Creating Nginx configuration..."
+        sudo cp "$PROJECT_ROOT/configs/nginx-local-generated.conf" "$NGINX_CONF_DIR/sites-available/zixiao-git-server.conf"
+
+        if [ ! -L "$NGINX_CONF_DIR/sites-enabled/zixiao-git-server.conf" ]; then
+            sudo ln -s "$NGINX_CONF_DIR/sites-available/zixiao-git-server.conf" "$NGINX_CONF_DIR/sites-enabled/zixiao-git-server.conf"
+        fi
+
+        echo "✓ Nginx configuration installed"
+
+        # Test Nginx config
+        if sudo nginx -t &> /dev/null; then
+            echo "✓ Nginx configuration is valid"
+        else
+            echo "WARNING: Nginx configuration test failed"
+        fi
+    else
+        echo "WARNING: Nginx sites-available directory not found"
+        echo "Please manually configure Nginx using configs/nginx-local-generated.conf"
+    fi
+fi
+
 echo ""
 echo "======================================"
 echo "Installation completed successfully!"
@@ -132,6 +247,17 @@ echo "======================================"
 echo ""
 echo "Next steps:"
 echo "  1. Review and update configs/server.yaml"
-echo "  2. Build the project: make build"
-echo "  3. Run the server: make run"
+echo "  2. Build the frontend: cd frontend && npm run build"
+echo "  3. Build the backend: make build"
+echo "  4. Start the backend server: make run"
+echo "  5. Start/Restart Nginx:"
+if [ "$OS" = "Darwin" ]; then
+    echo "     brew services start nginx"
+    echo "     (or: brew services restart nginx)"
+else
+    echo "     sudo systemctl start nginx"
+    echo "     (or: sudo systemctl restart nginx)"
+fi
+echo ""
+echo "Access the application at: http://localhost"
 echo ""

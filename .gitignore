@@ -58,4 +58,18 @@ Thumbs.db
 
 # Config
 configs/server.yaml.local
+configs/nginx-local-generated.conf
 
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.env.local
+web/dist/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+go.sum
