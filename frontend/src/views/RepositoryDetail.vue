@@ -98,7 +98,7 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useRepositoryStore } from '@/stores/repository'
-import mdui from 'mdui'
+import { snackbar } from 'mdui'
 
 const route = useRoute()
 const router = useRouter()
@@ -126,7 +126,7 @@ async function loadRepository() {
       is_public: repository.value.is_public
     }
   } catch (error) {
-    mdui.snackbar({
+    snackbar({
       message: '加载仓库失败',
       placement: 'top'
     })
@@ -140,14 +140,14 @@ async function handleUpdateRepo() {
   try {
     await repoStore.updateRepository(route.params.id, editForm.value)
     repository.value = repoStore.currentRepository
-    mdui.snackbar({
+    snackbar({
       message: '仓库更新成功！',
       icon: 'done',
       placement: 'top'
     })
     showEditDialog.value = false
   } catch (error) {
-    mdui.snackbar({
+    snackbar({
       message: error.error || '更新仓库失败',
       placement: 'top'
     })
@@ -159,7 +159,7 @@ async function handleUpdateRepo() {
 function copyCloneCommand() {
   const command = `git clone http://localhost:8080/${authStore.user?.username}/${repository.value.name}.git`
   navigator.clipboard.writeText(command).then(() => {
-    mdui.snackbar({
+    snackbar({
       message: '已复制到剪贴板',
       icon: 'done',
       placement: 'bottom'

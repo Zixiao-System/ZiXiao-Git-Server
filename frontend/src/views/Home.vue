@@ -117,7 +117,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import mdui from 'mdui'
+import { setTheme, snackbar } from 'mdui'
 
 const themeIcon = ref('brightness_auto')
 let currentTheme = 'auto'
@@ -140,11 +140,11 @@ function toggleTheme() {
   const currentIndex = themes.indexOf(currentTheme)
   currentTheme = themes[(currentIndex + 1) % themes.length]
 
-  mdui.setTheme(currentTheme)
+  setTheme(currentTheme)
   localStorage.setItem('theme', currentTheme)
   updateThemeIcon()
 
-  mdui.snackbar({
+  snackbar({
     message: `已切换到${currentTheme === 'auto' ? '自动' : currentTheme === 'light' ? '亮色' : '暗色'}主题`,
     placement: 'bottom'
   })
@@ -153,7 +153,7 @@ function toggleTheme() {
 function copyCommand() {
   const command = 'git clone http://localhost:8080/username/repo.git'
   navigator.clipboard.writeText(command).then(() => {
-    mdui.snackbar({
+    snackbar({
       message: '已复制到剪贴板',
       icon: 'done',
       placement: 'bottom'
@@ -163,7 +163,7 @@ function copyCommand() {
 
 onMounted(() => {
   currentTheme = localStorage.getItem('theme') || 'auto'
-  mdui.setTheme(currentTheme)
+  setTheme(currentTheme)
   updateThemeIcon()
 })
 </script>

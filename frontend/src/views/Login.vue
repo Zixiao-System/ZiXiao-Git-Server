@@ -48,7 +48,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import mdui from 'mdui'
+import { snackbar } from 'mdui'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -64,14 +64,14 @@ async function handleLogin() {
   loading.value = true
   try {
     await authStore.login(formData.value.username, formData.value.password)
-    mdui.snackbar({
+    snackbar({
       message: '登录成功！',
       icon: 'done',
       placement: 'top'
     })
     router.push('/dashboard')
   } catch (error) {
-    mdui.snackbar({
+    snackbar({
       message: error.error || '登录失败，请检查用户名和密码',
       placement: 'top'
     })

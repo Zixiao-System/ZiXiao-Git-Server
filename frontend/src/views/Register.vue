@@ -67,7 +67,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import mdui from 'mdui'
+import { snackbar } from 'mdui'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -83,7 +83,7 @@ const loading = ref(false)
 
 async function handleRegister() {
   if (formData.value.password.length < 8) {
-    mdui.snackbar({
+    snackbar({
       message: '密码长度至少为8位',
       placement: 'top'
     })
@@ -91,7 +91,7 @@ async function handleRegister() {
   }
 
   if (formData.value.password !== formData.value.confirmPassword) {
-    mdui.snackbar({
+    snackbar({
       message: '两次输入的密码不一致',
       placement: 'top'
     })
@@ -105,14 +105,14 @@ async function handleRegister() {
       formData.value.password,
       formData.value.email
     )
-    mdui.snackbar({
+    snackbar({
       message: '注册成功！请登录',
       icon: 'done',
       placement: 'top'
     })
     router.push('/login')
   } catch (error) {
-    mdui.snackbar({
+    snackbar({
       message: error.error || '注册失败，请重试',
       placement: 'top'
     })

@@ -101,7 +101,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useRepositoryStore } from '@/stores/repository'
-import mdui from 'mdui'
+import { snackbar } from 'mdui'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -121,7 +121,7 @@ async function loadRepositories() {
   try {
     repositories.value = await repoStore.fetchRepositories()
   } catch (error) {
-    mdui.snackbar({
+    snackbar({
       message: '加载仓库失败',
       placement: 'top'
     })
@@ -131,7 +131,7 @@ async function loadRepositories() {
 async function handleCreateRepo() {
   try {
     await repoStore.createRepository(newRepo.value)
-    mdui.snackbar({
+    snackbar({
       message: '仓库创建成功！',
       icon: 'done',
       placement: 'top'
@@ -140,7 +140,7 @@ async function handleCreateRepo() {
     newRepo.value = { name: '', description: '', is_public: false }
     await loadRepositories()
   } catch (error) {
-    mdui.snackbar({
+    snackbar({
       message: error.error || '创建仓库失败',
       placement: 'top'
     })
@@ -149,7 +149,7 @@ async function handleCreateRepo() {
 
 function handleLogout() {
   authStore.logout()
-  mdui.snackbar({
+  snackbar({
     message: '已退出登录',
     placement: 'top'
   })

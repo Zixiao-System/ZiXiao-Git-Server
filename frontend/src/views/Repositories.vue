@@ -120,7 +120,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useRepositoryStore } from '@/stores/repository'
-import mdui from 'mdui'
+import { snackbar } from 'mdui'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -157,7 +157,7 @@ async function loadRepositories() {
   try {
     await repoStore.fetchRepositories()
   } catch (error) {
-    mdui.snackbar({
+    snackbar({
       message: '加载仓库失败',
       placement: 'top'
     })
@@ -170,7 +170,7 @@ async function handleCreateRepo() {
   creating.value = true
   try {
     await repoStore.createRepository(newRepo.value)
-    mdui.snackbar({
+    snackbar({
       message: '仓库创建成功！',
       icon: 'done',
       placement: 'top'
@@ -178,7 +178,7 @@ async function handleCreateRepo() {
     showCreateDialog.value = false
     newRepo.value = { name: '', description: '', is_public: false }
   } catch (error) {
-    mdui.snackbar({
+    snackbar({
       message: error.error || '创建仓库失败',
       placement: 'top'
     })
@@ -196,7 +196,7 @@ async function handleDeleteRepo() {
   deleting.value = true
   try {
     await repoStore.deleteRepository(repoToDelete.value.id)
-    mdui.snackbar({
+    snackbar({
       message: '仓库已删除',
       icon: 'done',
       placement: 'top'
@@ -204,7 +204,7 @@ async function handleDeleteRepo() {
     showDeleteDialog.value = false
     repoToDelete.value = null
   } catch (error) {
-    mdui.snackbar({
+    snackbar({
       message: error.error || '删除仓库失败',
       placement: 'top'
     })
@@ -220,7 +220,7 @@ function formatDate(dateString) {
 
 function handleLogout() {
   authStore.logout()
-  mdui.snackbar({
+  snackbar({
     message: '已退出登录',
     placement: 'top'
   })

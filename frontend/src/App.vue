@@ -6,12 +6,12 @@
 
 <script setup>
 import { onMounted } from 'vue'
-import mdui from 'mdui'
+import { setTheme } from 'mdui'
 
 onMounted(() => {
   // Initialize MDUI theme
   const savedTheme = localStorage.getItem('theme') || 'auto'
-  mdui.setTheme(savedTheme)
+  setTheme(savedTheme)
 })
 </script>
 
