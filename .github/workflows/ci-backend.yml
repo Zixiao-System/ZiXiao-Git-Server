@@ -177,6 +177,9 @@ jobs:
           brew install openssl zlib
 
       - name: Build project
+        env:
+          CGO_CFLAGS: "-I${{ github.workspace }}/git-core/include"
+          CGO_LDFLAGS: "-L${{ github.workspace }}/git-core/lib"
         run: make build
 
       - name: Test server startup
