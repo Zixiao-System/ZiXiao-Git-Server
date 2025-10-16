@@ -1,10 +1,17 @@
 <template>
   <div class="not-found">
     <mdui-card class="not-found-card">
-      <mdui-icon name="error_outline" style="font-size: 96px; opacity: 0.5;"></mdui-icon>
+      <mdui-icon
+        name="error_outline"
+        style="font-size: 96px; opacity: 0.5;"
+      />
       <h1>404</h1>
       <p>页面未找到</p>
-      <mdui-button variant="filled" icon="home" @click="$router.push('/')">
+      <mdui-button
+        variant="filled"
+        icon="home"
+        @click="$router.push('/')"
+      >
         返回首页
       </mdui-button>
     </mdui-card>

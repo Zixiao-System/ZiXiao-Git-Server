@@ -9,25 +9,17 @@ export const useAuthStore = defineStore('auth', () => {
   const isAuthenticated = computed(() => !!token.value)
 
   async function login(username, password) {
-    try {
-      const response = await authService.login(username, password)
-      token.value = response.token
-      user.value = response.user
-      localStorage.setItem('token', response.token)
-      localStorage.setItem('user', JSON.stringify(response.user))
-      return response
-    } catch (error) {
-      throw error
-    }
+    const response = await authService.login(username, password)
+    token.value = response.token
+    user.value = response.user
+    localStorage.setItem('token', response.token)
+    localStorage.setItem('user', JSON.stringify(response.user))
+    return response
   }
 
   async function register(username, password, email) {
-    try {
-      const response = await authService.register(username, password, email)
-      return response
-    } catch (error) {
-      throw error
-    }
+    const response = await authService.register(username, password, email)
+    return response
   }
 
   function logout() {

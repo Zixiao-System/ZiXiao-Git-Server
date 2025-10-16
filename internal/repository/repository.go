@@ -13,10 +13,10 @@ import (
 )
 
 var (
-	ErrRepoExists    = fmt.Errorf("repository already exists")
-	ErrRepoNotFound  = fmt.Errorf("repository not found")
-	ErrAccessDenied  = fmt.Errorf("access denied")
-	ErrInvalidName   = fmt.Errorf("invalid repository name")
+	ErrRepoExists   = fmt.Errorf("repository already exists")
+	ErrRepoNotFound = fmt.Errorf("repository not found")
+	ErrAccessDenied = fmt.Errorf("access denied")
+	ErrInvalidName  = fmt.Errorf("invalid repository name")
 )
 
 // Create creates a new repository

@@ -1,18 +1,33 @@
 <template>
   <div class="dashboard-layout">
     <mdui-top-app-bar>
-      <mdui-button-icon icon="menu" @click="drawerOpen = !drawerOpen"></mdui-button-icon>
+      <mdui-button-icon
+        icon="menu"
+        @click="drawerOpen = !drawerOpen"
+      />
       <mdui-top-app-bar-title>我的仓库</mdui-top-app-bar-title>
-      <div style="flex-grow: 1"></div>
-      <mdui-button-icon icon="logout" @click="handleLogout"></mdui-button-icon>
+      <div style="flex-grow: 1" />
+      <mdui-button-icon
+        icon="logout"
+        @click="handleLogout"
+      />
     </mdui-top-app-bar>
 
-    <mdui-navigation-drawer :open="drawerOpen" @close="drawerOpen = false">
+    <mdui-navigation-drawer
+      :open="drawerOpen"
+      @close="drawerOpen = false"
+    >
       <mdui-list>
-        <mdui-list-item icon="dashboard" @click="$router.push('/dashboard')">
+        <mdui-list-item
+          icon="dashboard"
+          @click="$router.push('/dashboard')"
+        >
           仪表盘
         </mdui-list-item>
-        <mdui-list-item icon="folder" @click="$router.push('/repositories')">
+        <mdui-list-item
+          icon="folder"
+          @click="$router.push('/repositories')"
+        >
           我的仓库
         </mdui-list-item>
         <mdui-list-item icon="settings">
@@ -24,7 +39,11 @@
     <div class="content-area">
       <div class="page-header">
         <h1>我的仓库</h1>
-        <mdui-button variant="filled" icon="add" @click="showCreateDialog = true">
+        <mdui-button
+          variant="filled"
+          icon="add"
+          @click="showCreateDialog = true"
+        >
           创建仓库
         </mdui-button>
       </div>
@@ -34,48 +53,84 @@
         placeholder="搜索仓库..."
         icon="search"
         style="margin-bottom: 24px; width: 100%;"
-      ></mdui-text-field>
+      />
 
-      <div v-if="loading" style="text-align: center; padding: 48px;">
-        <mdui-circular-progress></mdui-circular-progress>
+      <div
+        v-if="loading"
+        style="text-align: center; padding: 48px;"
+      >
+        <mdui-circular-progress />
       </div>
 
-      <div v-else-if="filteredRepositories.length > 0" class="repo-grid">
-        <mdui-card v-for="repo in filteredRepositories" :key="repo.id" class="repo-card">
+      <div
+        v-else-if="filteredRepositories.length > 0"
+        class="repo-grid"
+      >
+        <mdui-card
+          v-for="repo in filteredRepositories"
+          :key="repo.id"
+          class="repo-card"
+        >
           <div class="repo-header">
-            <mdui-icon name="folder" class="repo-icon"></mdui-icon>
+            <mdui-icon
+              name="folder"
+              class="repo-icon"
+            />
             <div class="repo-title">
               <h3>{{ repo.name }}</h3>
-              <mdui-chip v-if="repo.is_public">公开</mdui-chip>
-              <mdui-chip v-else>私有</mdui-chip>
+              <mdui-chip v-if="repo.is_public">
+                公开
+              </mdui-chip>
+              <mdui-chip v-else>
+                私有
+              </mdui-chip>
             </div>
           </div>
 
-          <p class="repo-description">{{ repo.description || '无描述' }}</p>
+          <p class="repo-description">
+            {{ repo.description || '无描述' }}
+          </p>
 
           <div class="repo-meta">
-            <span><mdui-icon name="schedule"></mdui-icon> {{ formatDate(repo.created_at) }}</span>
+            <span><mdui-icon name="schedule" /> {{ formatDate(repo.created_at) }}</span>
           </div>
 
           <div class="repo-actions">
-            <mdui-button variant="text" icon="info" @click="$router.push(`/repositories/${repo.id}`)">
+            <mdui-button
+              variant="text"
+              icon="info"
+              @click="$router.push(`/repositories/${repo.id}`)"
+            >
               详情
             </mdui-button>
-            <mdui-button variant="text" icon="delete" @click="confirmDelete(repo)">
+            <mdui-button
+              variant="text"
+              icon="delete"
+              @click="confirmDelete(repo)"
+            >
               删除
             </mdui-button>
           </div>
         </mdui-card>
       </div>
 
-      <mdui-card v-else style="padding: 48px; text-align: center;">
-        <mdui-icon name="inbox" style="font-size: 64px; opacity: 0.3;"></mdui-icon>
+      <mdui-card
+        v-else
+        style="padding: 48px; text-align: center;"
+      >
+        <mdui-icon
+          name="inbox"
+          style="font-size: 64px; opacity: 0.3;"
+        />
         <p>{{ searchQuery ? '没有找到匹配的仓库' : '还没有仓库，创建第一个仓库吧！' }}</p>
       </mdui-card>
     </div>
 
     <!-- Create Repository Dialog -->
-    <mdui-dialog :open="showCreateDialog" @close="showCreateDialog = false">
+    <mdui-dialog
+      :open="showCreateDialog"
+      @close="showCreateDialog = false"
+    >
       <mdui-dialog-headline>创建新仓库</mdui-dialog-headline>
       <mdui-dialog-body>
         <form @submit.prevent="handleCreateRepo">
@@ -84,32 +139,54 @@
             label="仓库名称"
             required
             helper="只能包含字母、数字、连字符和下划线"
-          ></mdui-text-field>
+          />
           <mdui-text-field
             v-model="newRepo.description"
             label="描述"
             style="margin-top: 16px;"
-          ></mdui-text-field>
-          <mdui-checkbox v-model="newRepo.is_public" style="margin-top: 16px;">
+          />
+          <mdui-checkbox
+            v-model="newRepo.is_public"
+            style="margin-top: 16px;"
+          >
             公开仓库
           </mdui-checkbox>
         </form>
       </mdui-dialog-body>
       <mdui-dialog-actions>
-        <mdui-button @click="showCreateDialog = false">取消</mdui-button>
-        <mdui-button variant="filled" @click="handleCreateRepo" :loading="creating">创建</mdui-button>
+        <mdui-button @click="showCreateDialog = false">
+          取消
+        </mdui-button>
+        <mdui-button
+          variant="filled"
+          :loading="creating"
+          @click="handleCreateRepo"
+        >
+          创建
+        </mdui-button>
       </mdui-dialog-actions>
     </mdui-dialog>
 
     <!-- Delete Confirmation Dialog -->
-    <mdui-dialog :open="showDeleteDialog" @close="showDeleteDialog = false">
+    <mdui-dialog
+      :open="showDeleteDialog"
+      @close="showDeleteDialog = false"
+    >
       <mdui-dialog-headline>确认删除</mdui-dialog-headline>
       <mdui-dialog-body>
         确定要删除仓库 <strong>{{ repoToDelete?.name }}</strong> 吗？此操作不可撤销。
       </mdui-dialog-body>
       <mdui-dialog-actions>
-        <mdui-button @click="showDeleteDialog = false">取消</mdui-button>
-        <mdui-button variant="filled" @click="handleDeleteRepo" :loading="deleting">删除</mdui-button>
+        <mdui-button @click="showDeleteDialog = false">
+          取消
+        </mdui-button>
+        <mdui-button
+          variant="filled"
+          :loading="deleting"
+          @click="handleDeleteRepo"
+        >
+          删除
+        </mdui-button>
       </mdui-dialog-actions>
     </mdui-dialog>
   </div>

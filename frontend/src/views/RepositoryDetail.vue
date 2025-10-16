@@ -1,25 +1,40 @@
 <template>
   <div class="dashboard-layout">
     <mdui-top-app-bar>
-      <mdui-button-icon icon="arrow_back" @click="$router.back()"></mdui-button-icon>
+      <mdui-button-icon
+        icon="arrow_back"
+        @click="$router.back()"
+      />
       <mdui-top-app-bar-title>仓库详情</mdui-top-app-bar-title>
-      <div style="flex-grow: 1"></div>
-      <mdui-button-icon icon="settings" @click="showEditDialog = true"></mdui-button-icon>
+      <div style="flex-grow: 1" />
+      <mdui-button-icon
+        icon="settings"
+        @click="showEditDialog = true"
+      />
     </mdui-top-app-bar>
 
     <div class="content-area">
-      <div v-if="loading" style="text-align: center; padding: 48px;">
-        <mdui-circular-progress></mdui-circular-progress>
+      <div
+        v-if="loading"
+        style="text-align: center; padding: 48px;"
+      >
+        <mdui-circular-progress />
       </div>
 
       <div v-else-if="repository">
         <div class="repo-header">
           <div>
-            <h1><mdui-icon name="folder"></mdui-icon> {{ repository.name }}</h1>
-            <p class="repo-description">{{ repository.description || '无描述' }}</p>
+            <h1><mdui-icon name="folder" /> {{ repository.name }}</h1>
+            <p class="repo-description">
+              {{ repository.description || '无描述' }}
+            </p>
             <div class="repo-badges">
-              <mdui-chip v-if="repository.is_public">公开</mdui-chip>
-              <mdui-chip v-else>私有</mdui-chip>
+              <mdui-chip v-if="repository.is_public">
+                公开
+              </mdui-chip>
+              <mdui-chip v-else>
+                私有
+              </mdui-chip>
             </div>
           </div>
         </div>
@@ -28,7 +43,10 @@
           <h2>克隆仓库</h2>
           <div class="code-block">
             <code>git clone http://localhost:8080/{{ authStore.user?.username }}/{{ repository.name }}.git</code>
-            <mdui-button-icon icon="content_copy" @click="copyCloneCommand"></mdui-button-icon>
+            <mdui-button-icon
+              icon="content_copy"
+              @click="copyCloneCommand"
+            />
           </div>
         </mdui-card>
 
@@ -50,22 +68,35 @@
         <mdui-card style="padding: 24px; margin-top: 24px;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
             <h2>协作者</h2>
-            <mdui-button variant="outlined" icon="person_add">
+            <mdui-button
+              variant="outlined"
+              icon="person_add"
+            >
               添加协作者
             </mdui-button>
           </div>
-          <p style="opacity: 0.7;">暂无协作者</p>
+          <p style="opacity: 0.7;">
+            暂无协作者
+          </p>
         </mdui-card>
       </div>
 
-      <mdui-card v-else style="padding: 48px; text-align: center;">
+      <mdui-card
+        v-else
+        style="padding: 48px; text-align: center;"
+      >
         <p>仓库不存在或已被删除</p>
-        <mdui-button @click="$router.push('/repositories')">返回仓库列表</mdui-button>
+        <mdui-button @click="$router.push('/repositories')">
+          返回仓库列表
+        </mdui-button>
       </mdui-card>
     </div>
 
     <!-- Edit Repository Dialog -->
-    <mdui-dialog :open="showEditDialog" @close="showEditDialog = false">
+    <mdui-dialog
+      :open="showEditDialog"
+      @close="showEditDialog = false"
+    >
       <mdui-dialog-headline>编辑仓库</mdui-dialog-headline>
       <mdui-dialog-body>
         <form @submit.prevent="handleUpdateRepo">
@@ -74,20 +105,31 @@
             label="仓库名称"
             required
             disabled
-          ></mdui-text-field>
+          />
           <mdui-text-field
             v-model="editForm.description"
             label="描述"
             style="margin-top: 16px;"
-          ></mdui-text-field>
-          <mdui-checkbox v-model="editForm.is_public" style="margin-top: 16px;">
+          />
+          <mdui-checkbox
+            v-model="editForm.is_public"
+            style="margin-top: 16px;"
+          >
             公开仓库
           </mdui-checkbox>
         </form>
       </mdui-dialog-body>
       <mdui-dialog-actions>
-        <mdui-button @click="showEditDialog = false">取消</mdui-button>
-        <mdui-button variant="filled" @click="handleUpdateRepo" :loading="updating">保存</mdui-button>
+        <mdui-button @click="showEditDialog = false">
+          取消
+        </mdui-button>
+        <mdui-button
+          variant="filled"
+          :loading="updating"
+          @click="handleUpdateRepo"
+        >
+          保存
+        </mdui-button>
       </mdui-dialog-actions>
     </mdui-dialog>
   </div>
@@ -95,13 +137,12 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useRepositoryStore } from '@/stores/repository'
 import { snackbar } from 'mdui'
 
 const route = useRoute()
-const router = useRouter()
 const authStore = useAuthStore()
 const repoStore = useRepositoryStore()
 

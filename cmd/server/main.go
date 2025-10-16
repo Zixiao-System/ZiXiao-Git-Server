@@ -8,8 +8,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	// Database drivers
-	_ "github.com/lib/pq"              // PostgreSQL driver
-	_ "github.com/mattn/go-sqlite3"    // SQLite driver
+	_ "github.com/lib/pq"               // PostgreSQL driver
+	_ "github.com/mattn/go-sqlite3"     // SQLite driver
 	_ "github.com/microsoft/go-mssqldb" // SQL Server driver
 	"github.com/zixiao/git-server/internal/api"
 	"github.com/zixiao/git-server/internal/config"

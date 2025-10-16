@@ -19,18 +19,18 @@ type User struct {
 
 // Repository represents a git repository
 type Repository struct {
-	ID          int64     `json:"id" db:"id"`
-	Name        string    `json:"name" db:"name"`
-	Description string    `json:"description" db:"description"`
-	OwnerID     int64     `json:"owner_id" db:"owner_id"`
-	OwnerName   string    `json:"owner_name" db:"-"` // Joined field
-	IsPrivate   bool      `json:"is_private" db:"is_private"`
-	DefaultBranch string  `json:"default_branch" db:"default_branch"`
-	Size        int64     `json:"size" db:"size"` // in bytes
-	Stars       int       `json:"stars" db:"stars"`
-	Forks       int       `json:"forks" db:"forks"`
-	CreatedAt   time.Time `json:"created_at" db:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at" db:"updated_at"`
+	ID            int64     `json:"id" db:"id"`
+	Name          string    `json:"name" db:"name"`
+	Description   string    `json:"description" db:"description"`
+	OwnerID       int64     `json:"owner_id" db:"owner_id"`
+	OwnerName     string    `json:"owner_name" db:"-"` // Joined field
+	IsPrivate     bool      `json:"is_private" db:"is_private"`
+	DefaultBranch string    `json:"default_branch" db:"default_branch"`
+	Size          int64     `json:"size" db:"size"` // in bytes
+	Stars         int       `json:"stars" db:"stars"`
+	Forks         int       `json:"forks" db:"forks"`
+	CreatedAt     time.Time `json:"created_at" db:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at" db:"updated_at"`
 }
 
 // SSHKey represents a user's SSH public key

@@ -32,9 +32,9 @@ type DatabaseConfig struct {
 }
 
 type GitConfig struct {
-	RepoPath     string `yaml:"repo_path"`
-	MaxRepoSize  int64  `yaml:"max_repo_size"`  // in MB
-	MaxFileSize  int64  `yaml:"max_file_size"`  // in MB
+	RepoPath     string   `yaml:"repo_path"`
+	MaxRepoSize  int64    `yaml:"max_repo_size"` // in MB
+	MaxFileSize  int64    `yaml:"max_file_size"` // in MB
 	AllowedTypes []string `yaml:"allowed_types"` // file extensions
 }
 

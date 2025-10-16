@@ -2,83 +2,174 @@
   <div>
     <mdui-top-app-bar>
       <mdui-top-app-bar-title>ZiXiao Git Server</mdui-top-app-bar-title>
-      <div style="flex-grow: 1"></div>
-      <mdui-button-icon :icon="themeIcon" @click="toggleTheme"></mdui-button-icon>
-      <mdui-button-icon icon="open_in_new" href="https://github.com/Zixiao-System/ZiXiao-Git-Server" target="_blank"></mdui-button-icon>
+      <div style="flex-grow: 1" />
+      <mdui-button-icon
+        :icon="themeIcon"
+        @click="toggleTheme"
+      />
+      <mdui-button-icon
+        icon="open_in_new"
+        href="https://github.com/Zixiao-System/ZiXiao-Git-Server"
+        target="_blank"
+      />
     </mdui-top-app-bar>
 
     <div class="hero-section">
-      <div class="hero-title">🚀 ZiXiao Git Server</div>
-      <div class="hero-subtitle">轻量级、高性能的 Git 服务器</div>
+      <div class="hero-title">
+        🚀 ZiXiao Git Server
+      </div>
+      <div class="hero-subtitle">
+        轻量级、高性能的 Git 服务器
+      </div>
     </div>
 
     <div class="content-section">
       <div class="stats-grid">
-        <mdui-card class="stat-card" variant="elevated">
-          <mdui-icon name="code" class="feature-icon"></mdui-icon>
-          <div class="stat-value">Go + C++</div>
-          <div class="stat-label">混合架构</div>
+        <mdui-card
+          class="stat-card"
+          variant="elevated"
+        >
+          <mdui-icon
+            name="code"
+            class="feature-icon"
+          />
+          <div class="stat-value">
+            Go + C++
+          </div>
+          <div class="stat-label">
+            混合架构
+          </div>
         </mdui-card>
 
-        <mdui-card class="stat-card" variant="elevated">
-          <mdui-icon name="api" class="feature-icon"></mdui-icon>
-          <div class="stat-value">REST API</div>
-          <div class="stat-label">完整接口</div>
+        <mdui-card
+          class="stat-card"
+          variant="elevated"
+        >
+          <mdui-icon
+            name="api"
+            class="feature-icon"
+          />
+          <div class="stat-value">
+            REST API
+          </div>
+          <div class="stat-label">
+            完整接口
+          </div>
         </mdui-card>
 
-        <mdui-card class="stat-card" variant="elevated">
-          <mdui-icon name="security" class="feature-icon"></mdui-icon>
-          <div class="stat-value">JWT</div>
-          <div class="stat-label">安全认证</div>
+        <mdui-card
+          class="stat-card"
+          variant="elevated"
+        >
+          <mdui-icon
+            name="security"
+            class="feature-icon"
+          />
+          <div class="stat-value">
+            JWT
+          </div>
+          <div class="stat-label">
+            安全认证
+          </div>
         </mdui-card>
       </div>
 
-      <h2 style="text-align: center; margin-bottom: 32px;">核心特性</h2>
+      <h2 style="text-align: center; margin-bottom: 32px;">
+        核心特性
+      </h2>
       <div class="features-grid">
-        <mdui-card class="feature-card" variant="outlined">
-          <mdui-icon name="lock" class="feature-icon"></mdui-icon>
-          <div class="feature-title">🔐 用户认证</div>
+        <mdui-card
+          class="feature-card"
+          variant="outlined"
+        >
+          <mdui-icon
+            name="lock"
+            class="feature-icon"
+          />
+          <div class="feature-title">
+            🔐 用户认证
+          </div>
           <div class="feature-description">
             JWT token 认证，bcrypt 密码加密，确保用户数据安全
           </div>
         </mdui-card>
 
-        <mdui-card class="feature-card" variant="outlined">
-          <mdui-icon name="folder" class="feature-icon"></mdui-icon>
-          <div class="feature-title">📦 仓库管理</div>
+        <mdui-card
+          class="feature-card"
+          variant="outlined"
+        >
+          <mdui-icon
+            name="folder"
+            class="feature-icon"
+          />
+          <div class="feature-title">
+            📦 仓库管理
+          </div>
           <div class="feature-description">
             完整的仓库 CRUD 操作，支持公开/私有仓库，权限细粒度控制
           </div>
         </mdui-card>
 
-        <mdui-card class="feature-card" variant="outlined">
-          <mdui-icon name="cloud_sync" class="feature-icon"></mdui-icon>
-          <div class="feature-title">🌐 Git 协议</div>
+        <mdui-card
+          class="feature-card"
+          variant="outlined"
+        >
+          <mdui-icon
+            name="cloud_sync"
+            class="feature-icon"
+          />
+          <div class="feature-title">
+            🌐 Git 协议
+          </div>
           <div class="feature-description">
             完整的 HTTP Git 协议支持，支持 push/pull/clone 操作
           </div>
         </mdui-card>
 
-        <mdui-card class="feature-card" variant="outlined">
-          <mdui-icon name="speed" class="feature-icon"></mdui-icon>
-          <div class="feature-title">⚡ 高性能</div>
+        <mdui-card
+          class="feature-card"
+          variant="outlined"
+        >
+          <mdui-icon
+            name="speed"
+            class="feature-icon"
+          />
+          <div class="feature-title">
+            ⚡ 高性能
+          </div>
           <div class="feature-description">
             C++ 实现 Git 核心操作，Go 处理业务逻辑，性能卓越
           </div>
         </mdui-card>
       </div>
 
-      <h2 style="text-align: center; margin-bottom: 32px;">快速开始</h2>
-      <mdui-card class="quickstart-card" variant="filled">
-        <h3 style="margin-top: 0;">克隆仓库</h3>
+      <h2 style="text-align: center; margin-bottom: 32px;">
+        快速开始
+      </h2>
+      <mdui-card
+        class="quickstart-card"
+        variant="filled"
+      >
+        <h3 style="margin-top: 0;">
+          克隆仓库
+        </h3>
         <div class="code-block">
-          <mdui-button-icon class="copy-button" icon="content_copy" @click="copyCommand"></mdui-button-icon>
+          <mdui-button-icon
+            class="copy-button"
+            icon="content_copy"
+            @click="copyCommand"
+          />
           <code>git clone http://localhost:8080/username/repo.git</code>
         </div>
       </mdui-card>
 
-      <mdui-card style="padding: 24px; margin-bottom: 32px;" variant="outlined">
-        <h3 style="margin-top: 0;">多平台支持</h3>
+      <mdui-card
+        style="padding: 24px; margin-bottom: 32px;"
+        variant="outlined"
+      >
+        <h3 style="margin-top: 0;">
+          多平台支持
+        </h3>
         <mdui-list>
           <mdui-list-item icon="computer">
             <strong>macOS</strong> - 原生支持，Homebrew 依赖管理
@@ -96,13 +187,26 @@
       </mdui-card>
 
       <div class="action-buttons">
-        <mdui-button variant="filled" icon="play_arrow" @click="$router.push('/register')">
+        <mdui-button
+          variant="filled"
+          icon="play_arrow"
+          @click="$router.push('/register')"
+        >
           开始使用
         </mdui-button>
-        <mdui-button variant="outlined" icon="book" href="https://github.com/Zixiao-System/ZiXiao-Git-Server" target="_blank">
+        <mdui-button
+          variant="outlined"
+          icon="book"
+          href="https://github.com/Zixiao-System/ZiXiao-Git-Server"
+          target="_blank"
+        >
           查看文档
         </mdui-button>
-        <mdui-button variant="text" icon="login" @click="$router.push('/login')">
+        <mdui-button
+          variant="text"
+          icon="login"
+          @click="$router.push('/login')"
+        >
           登录
         </mdui-button>
       </div>

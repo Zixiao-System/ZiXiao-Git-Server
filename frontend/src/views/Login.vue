@@ -1,6 +1,9 @@
 <template>
   <div class="auth-container">
-    <mdui-card class="auth-card" variant="elevated">
+    <mdui-card
+      class="auth-card"
+      variant="elevated"
+    >
       <div class="auth-header">
         <h1>登录</h1>
         <p>欢迎回到 ZiXiao Git Server</p>
@@ -13,7 +16,7 @@
           placeholder="请输入用户名"
           required
           :disabled="loading"
-        ></mdui-text-field>
+        />
 
         <mdui-text-field
           v-model="formData.password"
@@ -23,7 +26,7 @@
           required
           :disabled="loading"
           toggle-password
-        ></mdui-text-field>
+        />
 
         <mdui-button
           type="submit"
