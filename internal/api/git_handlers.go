@@ -153,7 +153,7 @@ func GitUploadPack(c *gin.Context) {
 	}
 
 	// Read request body (wants and haves)
-	requestData, err := io.ReadAll(c.Request.Body)
+	_, err = io.ReadAll(c.Request.Body)
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Failed to read request")
 		return

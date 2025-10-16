@@ -2,7 +2,8 @@ package gitcore
 
 /*
 #cgo CXXFLAGS: -std=c++17 -I${SRCDIR}/../git-core/include
-#cgo LDFLAGS: -L${SRCDIR}/../git-core/lib -lgitcore -lstdc++ -lz -lcrypto
+#cgo darwin LDFLAGS: -L${SRCDIR}/../git-core/lib -lgitcore -lstdc++ -lz -L/opt/homebrew/opt/openssl/lib -L/usr/local/opt/openssl/lib -lcrypto -lssl
+#cgo linux LDFLAGS: -L${SRCDIR}/../git-core/lib -lgitcore -lstdc++ -lz -lcrypto -lssl
 #include "git_c_api.h"
 #include <stdlib.h>
 */

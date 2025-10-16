@@ -2,12 +2,7 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/zixiao/git-server/internal/auth"
-	"github.com/zixiao/git-server/internal/models"
 )
-
-// Note: Import auth package to avoid undefined references
-var _ = auth.GetUserByUsername
 
 // SetupRoutes configures all API routes
 func SetupRoutes(r *gin.Engine) {
