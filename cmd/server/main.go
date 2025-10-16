@@ -7,6 +7,10 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
+	// Database drivers
+	_ "github.com/lib/pq"              // PostgreSQL driver
+	_ "github.com/mattn/go-sqlite3"    // SQLite driver
+	_ "github.com/microsoft/go-mssqldb" // SQL Server driver
 	"github.com/zixiao/git-server/internal/api"
 	"github.com/zixiao/git-server/internal/config"
 	"github.com/zixiao/git-server/internal/database"
@@ -35,7 +39,17 @@ func main() {
 
 	// Initialize database
 	log.Println("Initializing database...")
-	if err := database.Init(cfg.Database.Type, cfg.Database.Path); err != nil {
+	dbCfg := database.Config{
+		Type:     cfg.Database.Type,
+		Path:     cfg.Database.Path,
+		Host:     cfg.Database.Host,
+		Port:     cfg.Database.Port,
+		Name:     cfg.Database.Name,
+		User:     cfg.Database.User,
+		Password: cfg.Database.Password,
+		SSLMode:  cfg.Database.SSLMode,
+	}
+	if err := database.Init(dbCfg); err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
 	defer database.Close()

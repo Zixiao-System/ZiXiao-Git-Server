@@ -82,10 +82,10 @@ func GetRepository(c *gin.Context) {
 
 // ListRepositories lists repositories for a user
 func ListRepositories(c *gin.Context) {
-	owner := c.Param("owner")
+	username := c.Param("username")
 
 	// Get owner user
-	user, err := auth.GetUserByUsername(owner)
+	user, err := auth.GetUserByUsername(username)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
 		return

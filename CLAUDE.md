@@ -1,74 +1,110 @@
-# CLAUDE.md - ZiXiao Git Server
+# CLAUDE.md
 
-This file provides context for Claude Code instances working on the ZiXiao Git Server codebase.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Overview
 
 ZiXiao Git Server is a lightweight, high-performance Git server with a hybrid architecture:
-- **C++ Core**: Low-level Git operations (repository, objects, protocol, pack files)
-- **Go Backend**: HTTP API, business logic, authentication, database
+- **Vue 3 Frontend**: Modern SPA with Vue Router, Pinia state management, MDUI 2.x components
+- **Nginx**: Reverse proxy serving frontend and proxying API/Git requests
+- **Go Backend**: HTTP API, business logic, authentication, database (port 8080)
 - **CGo Bridge**: C API wrapper enabling Go to call C++ functions
+- **C++ Core**: Low-level Git operations (repository, objects, protocol, pack files)
 
-**Tech Stack**: Go 1.21+, C++17, Gin web framework, JWT auth, SQLite, MDUI 2.x frontend
+**Tech Stack**: Vue 3, Vite, Pinia, Vue Router, Nginx, Go 1.21+, C++17, Gin framework, JWT auth, SQLite3/PostgreSQL/SQL Server, MDUI 2.x
 
 ## Common Commands
 
 ```bash
-# Build everything (C++ library + Go server)
-make build
+# Backend
+make build          # Build C++ library + Go server
+make build-cpp      # Build C++ library only
+make build-go       # Build Go server only
+make run            # Build and run Go server (port 8080)
+make clean          # Clean build artifacts
+make test           # Run Go tests
 
-# Build C++ library only
-make build-cpp
+# Frontend
+cd frontend
+npm install         # Install dependencies
+npm run dev         # Dev server (port 3000)
+npm run build       # Production build to web/dist/
+npm run preview     # Preview production build
+npm run lint        # Lint Vue files
 
-# Build Go server only
-make build-go
+# Build frontend (from project root)
+./scripts/build-frontend.sh        # Linux/macOS
+./scripts/build-frontend.ps1       # Windows PowerShell
 
-# Run the server (builds first if needed)
-make run
-
-# Clean build artifacts
-make clean
-
-# Install dependencies (macOS/Linux)
-./scripts/install.sh
-
-# Install dependencies (Windows PowerShell)
-./scripts/install.ps1
-
-# API testing
-./scripts/api-test.sh
+# Full stack setup
+./scripts/install.sh               # Install all dependencies (macOS/Linux)
+./scripts/install.ps1              # Install all dependencies (Windows)
+./scripts/api-test.sh              # Test API endpoints
 ```
 
 ## Architecture Deep Dive
 
-### Three-Layer Hybrid Architecture
+### Four-Layer Full Stack Architecture
 
 ```
 ┌─────────────────────────────────────┐
-│   Go HTTP API Layer (Gin)           │  ← REST API, JWT Auth, CORS
-│   internal/api/                      │
-└─────────────────┬───────────────────┘
-                  │
-┌─────────────────▼───────────────────┐
-│   Go Business Logic Layer           │  ← Repository CRUD, User Management
-│   internal/{repository, auth, etc}  │     Database Operations (SQLite)
-└─────────────────┬───────────────────┘
-                  │
-┌─────────────────▼───────────────────┐
-│   CGo Bridge Layer                  │  ← pkg/gitcore/gitcore.go
-│   #cgo directives, C.* calls        │     Type conversions (Go ↔ C)
-└─────────────────┬───────────────────┘
-                  │
-┌─────────────────▼───────────────────┐
-│   C API Wrapper (C ABI)             │  ← git-core/include/git_c_api.h
-│   extern "C" functions              │     C-compatible function signatures
-└─────────────────┬───────────────────┘
-                  │
-┌─────────────────▼───────────────────┐
-│   C++ Git Core Library              │  ← git-core/src/*.cpp
-│   GitRepository, GitObject, etc     │     Actual Git operations (libgit2-style)
-└─────────────────────────────────────┘
+│   Nginx (Port 80)                   │  ← Serves Vue SPA, proxies API/Git
+│   configs/nginx-*.conf              │
+└─────────┬───────────────────────────┘
+          │
+          ├──────────────────┐
+          │                  │
+┌─────────▼───────────────┐  │
+│   Vue 3 SPA             │  │         ← Vue Router, Pinia stores, MDUI components
+│   frontend/src/         │  │           Built to web/dist/ by Vite
+│   - views/              │  │
+│   - stores/             │  │
+│   - services/           │  │
+└─────────────────────────┘  │
+                             │
+                  ┌──────────▼─────────────────┐
+                  │   Go HTTP API (Gin:8080)   │  ← REST API, JWT Auth, CORS
+                  │   internal/api/            │
+                  └──────────┬─────────────────┘
+                             │
+                  ┌──────────▼─────────────────┐
+                  │   Go Business Logic        │  ← Repository CRUD, User Mgmt
+                  │   internal/{repo, auth}    │     Database Ops (SQLite)
+                  └──────────┬─────────────────┘
+                             │
+                  ┌──────────▼─────────────────┐
+                  │   CGo Bridge Layer         │  ← pkg/gitcore/gitcore.go
+                  │   #cgo directives          │     Type conversions (Go ↔ C)
+                  └──────────┬─────────────────┘
+                             │
+                  ┌──────────▼─────────────────┐
+                  │   C API Wrapper (C ABI)    │  ← git-core/include/git_c_api.h
+                  │   extern "C" functions     │     C-compatible signatures
+                  └──────────┬─────────────────┘
+                             │
+                  ┌──────────▼─────────────────┐
+                  │   C++ Git Core Library     │  ← git-core/src/*.cpp
+                  │   GitRepository, etc       │     Git operations (libgit2-style)
+                  └────────────────────────────┘
 ```
+
+### Request Flow Examples
+
+**Frontend Page Load**:
+1. Browser → `http://localhost/` → Nginx
+2. Nginx serves `web/dist/index.html`
+3. Vue app loads, initializes router and Pinia stores
+
+**API Request** (e.g., create repository):
+1. Vue component → `axios.post('/api/v1/repos')` → Nginx
+2. Nginx proxies → `http://localhost:8080/api/v1/repos` → Go Gin
+3. Gin handler validates JWT → calls business logic → returns JSON
+4. Response → Nginx → Vue (Pinia store updates state)
+
+**Git Operation** (e.g., git push):
+1. Git client → `http://localhost/owner/repo.git/git-receive-pack` → Nginx
+2. Nginx proxies → Go Gin → CGo bridge → C++ Git core
+3. C++ processes pack file, updates refs, returns status
 
 ### CGo Bridge Pattern
 
@@ -218,8 +254,25 @@ server:
   mode: release        # Gin mode: debug/release/test
 
 database:
-  type: sqlite         # Database type (currently only SQLite)
-  path: ./data/gitserver.db
+  type: sqlite3       # Database type: sqlite3, postgres, sqlserver
+  path: ./data/gitserver.db  # For SQLite
+
+  # PostgreSQL (uncomment to use)
+  # type: postgres
+  # host: localhost
+  # port: 5432
+  # name: zixiao_git
+  # user: postgres
+  # password: postgres
+  # sslmode: disable  # Options: disable, require, verify-ca, verify-full
+
+  # SQL Server (uncomment to use)
+  # type: sqlserver
+  # host: localhost
+  # port: 1433
+  # name: zixiao_git
+  # user: sa
+  # password: YourPassword123
 
 git:
   repo_path: ./data/repositories  # Where bare repos are stored
@@ -237,6 +290,22 @@ security:
 
 **File**: `internal/database/database.go`
 
+ZiXiao Git Server supports multiple database backends:
+- **SQLite3**: Default, file-based, suitable for development and small deployments
+- **PostgreSQL**: Recommended for production, better concurrency and performance
+- **SQL Server**: Enterprise-grade, suitable for Windows environments
+
+**Database Configuration**: See `database.Config` struct with fields:
+- `Type`: Database type (sqlite3, postgres, sqlserver)
+- `Path`: SQLite database file path
+- `Host`, `Port`, `Name`, `User`, `Password`: Connection parameters for PostgreSQL/SQL Server
+- `SSLMode`: SSL mode for PostgreSQL (disable, require, verify-ca, verify-full)
+
+**Schema Management**: Each database type has its own schema function:
+- `getSQLiteSchema()`: Uses AUTOINCREMENT, INTEGER, TEXT, DATETIME
+- `getPostgreSQLSchema()`: Uses SERIAL, VARCHAR, TIMESTAMP, BOOLEAN
+- `getSQLServerSchema()`: Uses IDENTITY, NVARCHAR, BIT, DATETIME
+
 Key tables:
 - `users`: id, username, password_hash (bcrypt), email, created_at, updated_at
 - `repositories`: id, name, description, owner_id, is_public, created_at, updated_at
@@ -245,26 +314,54 @@ Key tables:
 - `access_tokens`: id, user_id, token, name, last_used_at, created_at, expires_at
 - `activities`: id, user_id, repository_id, action, created_at
 
-**Important**: Foreign keys are enforced with `ON DELETE CASCADE` to maintain referential integrity.
+**Important**:
+- Foreign keys are enforced with `ON DELETE CASCADE` to maintain referential integrity
+- Connection pooling is configured with `SetMaxOpenConns(25)` and `SetMaxIdleConns(5)`
+- For detailed database configuration, migration, and optimization, see `docs/DATABASE.md`
+- For Docker deployment with different databases, see `docs/DOCKER_DEPLOYMENT.md`
 
 ## Platform-Specific Build Notes
 
 ### macOS
-- Dependencies via Homebrew: `brew install cmake openssl zlib`
+**Backend Dependencies**:
+- Dependencies via Homebrew: `brew install cmake openssl zlib go`
 - Uses Clang by default
 - IDE: Xcode with CMake generation (`cmake -G Xcode`)
 
+**Frontend Dependencies**:
+- Node.js: `brew install node`
+- Nginx: `brew install nginx`
+- Nginx config location: `/opt/homebrew/etc/nginx/servers/`
+
+**OpenSSL Paths** (for CGo linking):
+- Homebrew (Apple Silicon): `/opt/homebrew/opt/openssl/lib`
+- Homebrew (Intel): `/usr/local/opt/openssl/lib`
+
 ### Linux
-- Ubuntu/Debian: `apt-get install build-essential cmake libssl-dev zlib1g-dev`
-- CentOS/RHEL: `yum install gcc gcc-c++ cmake openssl-devel zlib-devel`
+**Backend Dependencies**:
+- Ubuntu/Debian: `apt-get install build-essential cmake libssl-dev zlib1g-dev golang`
+- CentOS/RHEL: `yum install gcc gcc-c++ cmake openssl-devel zlib-devel golang`
 - Uses GCC by default
 
+**Frontend Dependencies**:
+- Node.js: `apt-get install nodejs npm` (Ubuntu) or `yum install nodejs npm` (CentOS)
+- Nginx: `apt-get install nginx` (Ubuntu) or `yum install nginx` (CentOS)
+- Nginx config location: `/etc/nginx/sites-available/` and `/etc/nginx/sites-enabled/`
+
 ### Windows
+**Backend Dependencies**:
 - Requires Visual Studio 2022 with C++ workload
 - Dependencies via vcpkg: `vcpkg install openssl zlib`
 - Must set `VCPKG_ROOT` environment variable
+- Go: Download from https://golang.org/dl/
 - PowerShell scripts: `./scripts/build.ps1`, `./scripts/install.ps1`
 - Can also use WSL2 for Linux-style build
+
+**Frontend Dependencies**:
+- Node.js: Download from https://nodejs.org/
+- Nginx: Download from http://nginx.org/en/download.html
+  - Extract to `C:\nginx\`
+  - Configure with PowerShell scripts
 
 ## API Structure
 
@@ -292,16 +389,207 @@ Key tables:
 
 ## Frontend Architecture
 
-**File**: `web/index.html`
+**Location**: `frontend/src/`
 
-Built with **MDUI 2.x** (Material Design UI Web Components):
-- Auto/light/dark theme support with `mdui.setTheme()`
-- Material Design 3 components: `<mdui-card>`, `<mdui-button>`, `<mdui-top-app-bar>`
-- Theme toggle cycles: auto → light → dark → auto
-- Copy-to-clipboard with snackbar feedback
-- Fully responsive grid layouts
+Built with **Vue 3 + Vite + MDUI 2.x**:
 
-**Pattern**: Uses Web Components (custom HTML elements) instead of framework like React/Vue.
+### Project Structure
+```
+frontend/
+├── src/
+│   ├── App.vue              # Root component with navigation
+│   ├── main.js              # Entry point, Vue app initialization
+│   ├── router/
+│   │   └── index.js         # Vue Router config with auth guards
+│   ├── stores/
+│   │   ├── auth.js          # Pinia store for authentication state
+│   │   └── repository.js    # Pinia store for repository data
+│   ├── services/
+│   │   └── index.js         # API service layer (authService, repoService)
+│   ├── utils/
+│   │   └── api.js           # Axios instance with JWT interceptors
+│   └── views/
+│       ├── Home.vue         # Landing page
+│       ├── Login.vue        # Login form
+│       ├── Register.vue     # Registration form
+│       ├── Dashboard.vue    # User dashboard
+│       ├── Repositories.vue # Repository list
+│       ├── RepositoryDetail.vue  # Repository details
+│       └── NotFound.vue     # 404 page
+├── vite.config.js           # Vite config (proxy, build options)
+└── package.json             # Dependencies
+```
+
+### Key Patterns
+
+**MDUI 2.x Named Imports** (CRITICAL):
+```javascript
+// CORRECT - Use named imports
+import { setTheme, snackbar } from 'mdui'
+
+// Import components in main.js
+import 'mdui/components/button.js'
+import 'mdui/components/card.js'
+
+// WRONG - MDUI 2.x doesn't export default
+import mdui from 'mdui'  // Will cause build errors
+```
+
+**Pinia Store Pattern** (`frontend/src/stores/auth.js`):
+```javascript
+import { defineStore } from 'pinia'
+import { ref, computed } from 'vue'
+
+export const useAuthStore = defineStore('auth', () => {
+  const token = ref(localStorage.getItem('token') || '')
+  const user = ref(JSON.parse(localStorage.getItem('user') || 'null'))
+  const isAuthenticated = computed(() => !!token.value)
+
+  async function login(username, password) {
+    const response = await authService.login(username, password)
+    token.value = response.token
+    user.value = response.user
+    localStorage.setItem('token', response.token)
+    localStorage.setItem('user', JSON.stringify(response.user))
+  }
+
+  function logout() {
+    token.value = ''
+    user.value = null
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+  }
+
+  return { token, user, isAuthenticated, login, logout }
+})
+```
+
+**API Service Layer** (`frontend/src/services/index.js`):
+```javascript
+import apiClient from '@/utils/api'
+
+export const authService = {
+  async login(username, password) {
+    return await apiClient.post('/auth/login', { username, password })
+  },
+  async register(username, password, email) {
+    return await apiClient.post('/auth/register', { username, password, email })
+  }
+}
+
+export const repositoryService = {
+  async getRepositories() {
+    return await apiClient.get('/repos')
+  },
+  async createRepository(data) {
+    return await apiClient.post('/repos', data)
+  }
+  // ... more methods
+}
+```
+
+**Axios Interceptors** (`frontend/src/utils/api.js`):
+```javascript
+// Request interceptor - attach JWT token
+apiClient.interceptors.request.use((config) => {
+  const authStore = useAuthStore()
+  if (authStore.token) {
+    config.headers.Authorization = `Bearer ${authStore.token}`
+  }
+  return config
+})
+
+// Response interceptor - handle 401
+apiClient.interceptors.response.use(
+  (response) => response.data,
+  (error) => {
+    if (error.response?.status === 401) {
+      const authStore = useAuthStore()
+      authStore.logout()
+      window.location.href = '/login'
+    }
+    return Promise.reject(error.response.data)
+  }
+)
+```
+
+**Vue Router Navigation Guards** (`frontend/src/router/index.js`):
+```javascript
+router.beforeEach((to, from, next) => {
+  const authStore = useAuthStore()
+  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+    next({ name: 'login', query: { redirect: to.fullPath } })
+  } else {
+    next()
+  }
+})
+```
+
+### Development Workflow
+
+**Local Development** (frontend only):
+```bash
+cd frontend
+npm run dev    # Vite dev server on port 3000
+               # API requests proxy to localhost:8080
+```
+
+**Full Stack Development**:
+```bash
+# Terminal 1: Backend
+make run       # Go server on port 8080
+
+# Terminal 2: Frontend
+cd frontend
+npm run dev    # Vue app on port 3000 with proxy
+
+# Terminal 3: Nginx (optional, for production-like setup)
+nginx -c $(pwd)/configs/nginx-local-generated.conf
+```
+
+**Production Build**:
+```bash
+cd frontend
+npm run build              # Builds to web/dist/
+cd ..
+nginx -s reload            # Reload Nginx to serve new build
+```
+
+### Nginx Configuration
+
+**Development** (`configs/nginx-local.conf`):
+- Serves Vue SPA from `web/dist/`
+- Proxies `/api/*` to Go backend (port 8080)
+- Proxies Git protocol endpoints (`/:owner/:repo.git/*`)
+- Uses project-relative paths (replaced by install script)
+
+**Production** (`configs/nginx-prod.conf`):
+- SSL/TLS support (configure SSL certificates)
+- Security headers (HSTS, X-Frame-Options)
+- Gzip compression
+- Static asset caching
+
+**Key Nginx Patterns**:
+```nginx
+# SPA routing - all requests fall back to index.html
+location / {
+    root /path/to/web/dist;
+    try_files $uri $uri/ /index.html;
+}
+
+# API proxy
+location /api/ {
+    proxy_pass http://localhost:8080;
+    proxy_set_header Authorization $http_authorization;
+}
+
+# Git HTTP protocol
+location ~ ^/[^/]+/[^/]+\.git/ {
+    proxy_pass http://localhost:8080;
+    client_max_body_size 0;        # Allow large git pushes
+    proxy_buffering off;
+}
+```
 
 ## Testing
 
@@ -369,13 +657,27 @@ This matches GitHub/GitLab structure and allows easy file-based repository stora
 
 When working on this codebase, start by reading these files in order:
 
+**Full Stack Overview**:
 1. **README.md** - Overall project structure and features
 2. **configs/server.yaml** - Configuration options
-3. **internal/database/database.go** - Database schema
-4. **pkg/gitcore/gitcore.go** - CGo bridge interface
-5. **internal/api/routes.go** - API endpoint structure
-6. **internal/auth/auth.go** - Authentication patterns
-7. **git-core/include/git_c_api.h** - C API surface
+3. **CLAUDE.md** (this file) - Architecture deep dive
+
+**Backend Architecture**:
+4. **internal/database/database.go** - Database schema
+5. **pkg/gitcore/gitcore.go** - CGo bridge interface
+6. **internal/api/routes.go** - API endpoint structure
+7. **internal/auth/auth.go** - Authentication patterns
+8. **git-core/include/git_c_api.h** - C API surface
+
+**Frontend Architecture**:
+9. **frontend/src/main.js** - Vue app initialization
+10. **frontend/src/router/index.js** - Routing and navigation guards
+11. **frontend/src/stores/auth.js** - Authentication state management
+12. **frontend/src/utils/api.js** - Axios setup and interceptors
+13. **frontend/vite.config.js** - Build configuration
+
+**Deployment**:
+14. **configs/nginx-local.conf** - Nginx reverse proxy setup
 
 ## Common Development Tasks
 
@@ -386,6 +688,66 @@ When working on this codebase, start by reading these files in order:
 3. Update authentication middleware if needed
 4. Update `docs/API.md` with endpoint documentation
 5. Add test case to `scripts/api-test.sh`
+6. Create corresponding frontend service method in `frontend/src/services/index.js`
+
+### Adding a New Vue Page
+
+1. Create component in `frontend/src/views/YourPage.vue`:
+   ```vue
+   <script setup>
+   import { ref, onMounted } from 'vue'
+   import { snackbar } from 'mdui'
+   import { useAuthStore } from '@/stores/auth'
+
+   const authStore = useAuthStore()
+
+   onMounted(() => {
+     // Fetch data
+   })
+   </script>
+
+   <template>
+     <div class="container">
+       <!-- MDUI components -->
+     </div>
+   </template>
+   ```
+
+2. Add route in `frontend/src/router/index.js`:
+   ```javascript
+   {
+     path: '/your-path',
+     name: 'yourPage',
+     component: () => import('@/views/YourPage.vue'),
+     meta: { requiresAuth: true }  // If authentication needed
+   }
+   ```
+
+3. Add navigation link in `frontend/src/App.vue` if needed
+
+### Adding a New Pinia Store
+
+1. Create store file `frontend/src/stores/yourStore.js`:
+   ```javascript
+   import { defineStore } from 'pinia'
+   import { ref } from 'vue'
+
+   export const useYourStore = defineStore('yourStore', () => {
+     const data = ref([])
+
+     async function fetchData() {
+       // API call
+     }
+
+     return { data, fetchData }
+   })
+   ```
+
+2. Use in component:
+   ```javascript
+   import { useYourStore } from '@/stores/yourStore'
+   const yourStore = useYourStore()
+   ```
 
 ### Adding a New Git Operation
 
@@ -398,12 +760,60 @@ When working on this codebase, start by reading these files in order:
 
 ### Modifying Database Schema
 
-1. Update schema SQL in `internal/database/database.go:initSchema()`
+1. Update schema SQL in appropriate function in `internal/database/database.go`:
+   - `getSQLiteSchema()` for SQLite3
+   - `getPostgreSQLSchema()` for PostgreSQL
+   - `getSQLServerSchema()` for SQL Server
 2. Update corresponding model struct in `internal/models/models.go`
 3. Consider migration strategy for existing databases (currently requires manual handling)
-4. Test with fresh database: `rm data/gitserver.db && make run`
+4. Test with fresh database:
+   - SQLite: `rm data/gitserver.db && make run`
+   - PostgreSQL: Drop and recreate database
+   - SQL Server: Drop and recreate database
+
+### Updating Nginx Configuration
+
+1. Edit config files: `configs/nginx-{local,dev,prod}.conf`
+2. For local development:
+   ```bash
+   ./scripts/install.sh    # Regenerates nginx-local-generated.conf
+   nginx -s reload         # Reload Nginx
+   ```
+3. Test configuration: `nginx -t -c /path/to/config`
 
 ## Debugging Tips
+
+### Frontend Debugging
+
+**Vue DevTools**:
+- Install Vue DevTools browser extension
+- Inspect component hierarchy, Pinia stores, router
+- Monitor events and performance
+
+**Vite Dev Server**:
+```bash
+cd frontend
+npm run dev    # Hot module replacement enabled
+               # View at http://localhost:3000
+```
+
+**Common Issues**:
+- **MDUI import errors**: Always use named imports, never default import
+  ```javascript
+  // ✓ CORRECT
+  import { snackbar, setTheme } from 'mdui'
+
+  // ✗ WRONG - will cause "default is not exported" error
+  import mdui from 'mdui'
+  ```
+- **401 errors**: Check JWT token in localStorage, verify Authorization header
+- **CORS errors**: Ensure Vite proxy is configured or Nginx is running
+- **Build errors**: Run `npm run lint` to catch Vue/JS errors
+
+**Browser DevTools**:
+- Network tab: Inspect API requests, check headers
+- Console: View errors and logs
+- Application tab: Check localStorage for token and user data
 
 ### CGo Debugging
 
@@ -434,18 +844,23 @@ When working on this codebase, start by reading these files in order:
 
 ## Known Limitations and TODOs
 
-- No database migrations system (manual schema updates required)
-- SSH protocol not yet implemented (only HTTP Git protocol)
-- No repository forking feature
-- No pull request / merge request system
-- No CI/CD integration
-- No webhooks support
-- No Git LFS support
-- No repository size enforcement (max_repo_size in config not enforced)
+- **No database migrations system** (manual schema updates required) - important for production
+- **SSH protocol** not yet implemented (only HTTP Git protocol)
+- **No repository forking** feature
+- **No pull request / merge request** system
+- **No CI/CD** integration
+- **No webhooks** support
+- **No Git LFS** support
+- **No repository size enforcement** (max_repo_size in config not enforced)
 
 ## Additional Resources
 
+- **Database Configuration**: `docs/DATABASE.md` - Detailed guide for SQLite3, PostgreSQL, SQL Server
+- **Docker Deployment**: `docs/DOCKER_DEPLOYMENT.md` - Complete Docker deployment guide
 - **API Documentation**: `docs/API.md`
+- **Frontend Development Guide**: `docs/FRONTEND_DEV.md`
+- **Frontend Deployment Guide**: `docs/FRONTEND_DEPLOYMENT.md`
+- **Frontend Migration Summary**: `FRONTEND_MIGRATION.md`
 - **Windows Setup**: `docs/WINDOWS.md`
 - **VS Code Setup**: `docs/VSCODE.md`
 - **Xcode Setup**: `docs/XCODE.md`
@@ -454,6 +869,6 @@ When working on this codebase, start by reading these files in order:
 
 ---
 
-**Last Updated**: 2024-10-16
-**Project Version**: 0.1.0
+**Last Updated**: 2025-10-16
+**Project Version**: 1.0.0 (Vue 3 Frontend)
 **License**: MIT

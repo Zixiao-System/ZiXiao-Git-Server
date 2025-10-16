@@ -19,13 +19,6 @@ func SetupRoutes(r *gin.Engine) {
 			auth.POST("/login", Login)
 		}
 
-		// User routes
-		users := v1.Group("/users")
-		{
-			users.GET("/:username", GetUser)
-			users.GET("/:owner/repos", OptionalAuthMiddleware(), ListRepositories)
-		}
-
 		// Protected routes
 		protected := v1.Group("")
 		protected.Use(AuthMiddleware())
@@ -45,6 +38,10 @@ func SetupRoutes(r *gin.Engine) {
 				repos.DELETE("/:owner/:repo/collaborators/:username", RemoveCollaborator)
 			}
 		}
+
+		// User routes (must come after more specific routes)
+		v1.GET("/users/:username", GetUser)
+		v1.GET("/users/:username/repos", OptionalAuthMiddleware(), ListRepositories)
 	}
 
 	// Git HTTP protocol routes

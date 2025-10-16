@@ -1,0 +1,236 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., v1.0.0)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build-frontend:
+    name: Build Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      - name: Build production bundle
+        run: |
+          cd frontend
+          npm run build
+
+      - name: Create frontend archive
+        run: |
+          cd web
+          tar -czf ../frontend-dist.tar.gz dist/
+
+      - name: Upload frontend artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend-dist.tar.gz
+
+  build-backend:
+    name: Build Backend
+    needs: build-frontend
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            goos: linux
+            goarch: amd64
+            asset_name: zixiao-git-server-linux-amd64
+          - os: ubuntu-latest
+            goos: linux
+            goarch: arm64
+            asset_name: zixiao-git-server-linux-arm64
+          - os: macos-latest
+            goos: darwin
+            goarch: amd64
+            asset_name: zixiao-git-server-darwin-amd64
+          - os: macos-latest
+            goos: darwin
+            goarch: arm64
+            asset_name: zixiao-git-server-darwin-arm64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+          cache: true
+
+      - name: Install dependencies (Ubuntu)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libssl-dev zlib1g-dev
+
+      - name: Install dependencies (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          brew install openssl zlib
+
+      - name: Build C++ library
+        run: make build-cpp
+
+      - name: Build Go binary
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: 1
+        run: |
+          make build-go
+
+      - name: Create release package
+        run: |
+          mkdir -p release/${{ matrix.asset_name }}
+          cp bin/zixiao-git-server release/${{ matrix.asset_name }}/
+          cp -r configs release/${{ matrix.asset_name }}/
+          cp README.md LICENSE release/${{ matrix.asset_name }}/
+
+          # Create startup script
+          cat > release/${{ matrix.asset_name }}/start.sh << 'EOF'
+          #!/bin/bash
+          mkdir -p data/repositories logs
+          ./zixiao-git-server -config ./configs/server.yaml
+          EOF
+          chmod +x release/${{ matrix.asset_name }}/start.sh
+
+          cd release
+          tar -czf ${{ matrix.asset_name }}.tar.gz ${{ matrix.asset_name }}
+
+      - name: Upload release artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.asset_name }}
+          path: release/${{ matrix.asset_name }}.tar.gz
+
+  create-release:
+    name: Create GitHub Release
+    needs: [build-frontend, build-backend]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+
+      - name: Generate release notes
+        id: release_notes
+        run: |
+          VERSION="${{ github.event.inputs.version || github.ref_name }}"
+          cat > release_notes.md << EOF
+          # ZiXiao Git Server ${VERSION}
+
+          ## 📦 Downloads
+
+          Choose the appropriate package for your platform:
+
+          - **Linux AMD64**: \`zixiao-git-server-linux-amd64.tar.gz\`
+          - **Linux ARM64**: \`zixiao-git-server-linux-arm64.tar.gz\`
+          - **macOS Intel**: \`zixiao-git-server-darwin-amd64.tar.gz\`
+          - **macOS Apple Silicon**: \`zixiao-git-server-darwin-arm64.tar.gz\`
+          - **Frontend**: \`frontend-dist.tar.gz\`
+
+          ## 🚀 Quick Start
+
+          1. Download and extract the package for your platform
+          2. Edit \`configs/server.yaml\` to configure the server
+          3. Run \`./start.sh\` to start the server
+
+          ## 📝 Changelog
+
+          See [CHANGELOG.md](https://github.com/Zixiao-System/ZiXiao-Git-Server/blob/main/CHANGELOG.md) for details.
+
+          ## 🛠️ Requirements
+
+          - OpenSSL (libssl, libcrypto)
+          - zlib
+          - SQLite (included)
+
+          ## 📖 Documentation
+
+          - [Installation Guide](https://github.com/Zixiao-System/ZiXiao-Git-Server/blob/main/README.md)
+          - [API Documentation](https://github.com/Zixiao-System/ZiXiao-Git-Server/blob/main/docs/API.md)
+          - [Configuration Guide](https://github.com/Zixiao-System/ZiXiao-Git-Server/blob/main/CLAUDE.md)
+          EOF
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.event.inputs.version || github.ref_name }}
+          name: Release ${{ github.event.inputs.version || github.ref_name }}
+          body_path: release_notes.md
+          draft: false
+          prerelease: false
+          files: |
+            artifacts/*/*.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-docker:
+    name: Build and Push Docker Image
+    needs: build-backend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: zixiao/git-server
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

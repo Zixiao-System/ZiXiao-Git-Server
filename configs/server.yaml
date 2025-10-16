@@ -4,15 +4,28 @@ server:
   mode: release  # debug or release
 
 database:
-  type: sqlite
+  # Database type: sqlite3, postgres, sqlserver
+  type: sqlite3
+
+  # SQLite configuration
   path: ./data/gitserver.db
-  # For PostgreSQL or MySQL:
+
+  # PostgreSQL configuration (uncomment to use)
   # type: postgres
   # host: localhost
   # port: 5432
-  # name: gitserver
+  # name: zixiao_git
   # user: postgres
-  # password: password
+  # password: postgres
+  # sslmode: disable  # Options: disable, require, verify-ca, verify-full
+
+  # SQL Server configuration (uncomment to use)
+  # type: sqlserver
+  # host: localhost
+  # port: 1433
+  # name: zixiao_git
+  # user: sa
+  # password: YourPassword123
 
 git:
   repo_path: ./data/repositories

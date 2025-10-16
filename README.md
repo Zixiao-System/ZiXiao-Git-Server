@@ -1,16 +1,27 @@
 # ZiXiao Git Server
 
+[![Backend CI](https://github.com/Zixiao-System/ZiXiao-Git-Server/workflows/Backend%20CI/badge.svg)](https://github.com/Zixiao-System/ZiXiao-Git-Server/actions/workflows/ci-backend.yml)
+[![Frontend CI](https://github.com/Zixiao-System/ZiXiao-Git-Server/workflows/Frontend%20CI/badge.svg)](https://github.com/Zixiao-System/ZiXiao-Git-Server/actions/workflows/ci-frontend.yml)
+[![Release](https://github.com/Zixiao-System/ZiXiao-Git-Server/workflows/Release/badge.svg)](https://github.com/Zixiao-System/ZiXiao-Git-Server/actions/workflows/release.yml)
+[![codecov](https://codecov.io/gh/Zixiao-System/ZiXiao-Git-Server/branch/main/graph/badge.svg)](https://codecov.io/gh/Zixiao-System/ZiXiao-Git-Server)
+[![Go Report Card](https://goreportcard.com/badge/github.com/zixiao/git-server)](https://goreportcard.com/report/github.com/zixiao/git-server)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Docker](https://img.shields.io/docker/v/zixiao/git-server?label=docker)](https://hub.docker.com/r/zixiao/git-server)
+
 一个使用 **Go** 和 **C++** 实现的轻量级 Git 服务器，类似于 GitLab，支持 HTTP Git 协议、用户认证、仓库管理等功能。
 
 ## 特性
 
 - **混合架构**: Go 处理业务逻辑和 HTTP 服务，C++ 实现 Git 核心操作
+- **Vue 3 前端**: 现代化单页应用，支持深色模式
 - **用户认证**: JWT token 认证，密码加密存储
 - **仓库管理**: 创建、删除、列表、权限控制
 - **Git 协议**: 支持 HTTP Git 协议 (push/pull/clone)
 - **权限系统**: 公开/私有仓库，协作者管理
 - **REST API**: 完整的 RESTful API
-- **数据库**: SQLite (可扩展到 PostgreSQL/MySQL)
+- **多数据库支持**: SQLite3、PostgreSQL、SQL Server
+- **Docker 支持**: 提供完整的 Docker 镜像和 Docker Compose 配置
+- **CI/CD**: GitHub Actions 自动化构建和发布
 
 ## 技术栈
 
@@ -18,7 +29,7 @@
 - **Go 1.21+**: HTTP 服务器、业务逻辑
 - **Gin**: Web 框架
 - **JWT**: 用户认证
-- **SQLite**: 数据库
+- **数据库**: SQLite3 / PostgreSQL / SQL Server
 
 ### Git 核心
 - **C++ 17**: Git 对象模型、仓库操作
@@ -119,6 +130,89 @@ make run
 
 服务器将在 `http://localhost:8080` 启动
 
+## Docker 部署
+
+### 使用 Docker Compose (推荐)
+
+1. 克隆项目
+```bash
+git clone https://github.com/Zixiao-System/ZiXiao-Git-Server.git
+cd ZiXiao-Git-Server
+```
+
+2. 创建环境变量文件
+```bash
+cp .env.example .env
+# 编辑 .env 文件，修改 JWT_SECRET 等配置
+```
+
+3. 启动服务
+```bash
+# 基础部署 (SQLite)
+docker-compose up -d
+
+# 使用 PostgreSQL
+docker-compose --profile postgres up -d
+
+# 使用 SQL Server
+docker-compose --profile sqlserver up -d
+
+# 使用 Redis 缓存
+docker-compose --profile redis up -d
+
+# 完整部署 (PostgreSQL + Redis + Adminer)
+docker-compose --profile postgres --profile redis --profile adminer up -d
+```
+
+4. 查看日志
+```bash
+docker-compose logs -f
+```
+
+5. 停止服务
+```bash
+docker-compose down
+```
+
+### 使用 Docker
+
+1. 拉取镜像
+```bash
+docker pull zixiao/git-server:latest
+```
+
+2. 运行容器
+```bash
+docker run -d \
+  --name zixiao-git-server \
+  -p 8080:8080 \
+  -v $(pwd)/data:/app/data \
+  -v $(pwd)/logs:/app/logs \
+  -e JWT_SECRET=your-secret-key \
+  zixiao/git-server:latest
+```
+
+3. 使用自定义配置
+```bash
+docker run -d \
+  --name zixiao-git-server \
+  -p 8080:8080 \
+  -v $(pwd)/data:/app/data \
+  -v $(pwd)/logs:/app/logs \
+  -v $(pwd)/configs/server.yaml:/app/configs/server.yaml:ro \
+  zixiao/git-server:latest
+```
+
+### 构建自定义镜像
+
+```bash
+# 构建镜像
+docker build -t zixiao-git-server:custom .
+
+# 多架构构建
+docker buildx build --platform linux/amd64,linux/arm64 -t zixiao-git-server:custom .
+```
+
 ## 使用方法
 
 ### 用户注册
@@ -210,6 +304,20 @@ git clone http://alice:YOUR_TOKEN@localhost:8080/alice/my-project.git
 
 ## 配置说明
 
+### 数据库配置
+
+ZiXiao Git Server 支持多种数据库后端：
+
+- **SQLite3** (默认): 适合开发和小型部署，无需额外配置
+- **PostgreSQL**: 推荐用于生产环境，支持高并发
+- **SQL Server**: 适合企业环境和 Windows 部署
+
+详细的数据库配置指南请参见：
+- [数据库配置文档](docs/DATABASE.md) - 各数据库的详细配置、迁移和优化
+- [Docker 部署文档](docs/DOCKER_DEPLOYMENT.md) - Docker 环境下的数据库部署
+
+### 服务器配置
+
 `configs/server.yaml` 配置选项：
 
 ```yaml
@@ -219,8 +327,25 @@ server:
   mode: release        # debug 或 release
 
 database:
-  type: sqlite         # 数据库类型
-  path: ./data/gitserver.db
+  type: sqlite3        # 数据库类型: sqlite3, postgres, sqlserver
+  path: ./data/gitserver.db  # SQLite 数据库文件路径
+
+  # PostgreSQL 配置 (取消注释以使用)
+  # type: postgres
+  # host: localhost
+  # port: 5432
+  # name: zixiao_git
+  # user: postgres
+  # password: postgres
+  # sslmode: disable   # disable, require, verify-ca, verify-full
+
+  # SQL Server 配置 (取消注释以使用)
+  # type: sqlserver
+  # host: localhost
+  # port: 1433
+  # name: zixiao_git
+  # user: sa
+  # password: YourPassword123
 
 git:
   repo_path: ./data/repositories  # 仓库存储路径
@@ -376,12 +501,20 @@ make init       # 初始化项目目录
 - [x] 用户认证和授权
 - [x] 仓库 CRUD
 - [x] 权限管理
+- [x] Vue 3 前端 Web UI
+- [x] Nginx 反向代理
+- [x] Docker 和 Docker Compose 支持
+- [x] GitHub Actions CI/CD
+- [x] 多平台构建和发布
+- [x] PostgreSQL 数据库支持
+- [x] SQL Server 数据库支持
+- [ ] 数据库迁移系统
 - [ ] SSH 协议支持
-- [ ] Web UI
 - [ ] Webhook
 - [ ] CI/CD 集成
 - [ ] 代码审查
 - [ ] Issue 跟踪
+- [ ] Git LFS 支持
 
 ## 许可证
 
@@ -392,6 +525,8 @@ MIT License
 欢迎提交 Pull Request 和 Issue！
 
 开发指南：
+- [数据库配置](docs/DATABASE.md)
+- [Docker 部署](docs/DOCKER_DEPLOYMENT.md)
 - [VS Code 开发指南](docs/VSCODE.md)
 - [Xcode 开发指南](docs/XCODE.md)
 - [Windows 开发指南](docs/WINDOWS.md)

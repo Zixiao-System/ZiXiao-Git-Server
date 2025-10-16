@@ -1,0 +1,87 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Documentation
+*.md
+docs/
+LICENSE
+
+# Build artifacts
+bin/
+data/
+logs/
+*.db
+*.log
+
+# C++ build artifacts
+*.o
+git-core/build*/
+git-core/xcode-project/
+
+# Go build artifacts
+vendor/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Xcode
+*.xcodeproj
+*.xcworkspace
+xcuserdata/
+DerivedData/
+
+# Visual Studio
+.vs/
+*.code-workspace
+
+# CLion
+cmake-build-*/
+
+# Frontend development
+frontend/node_modules/
+frontend/dist/
+frontend/.env.local
+web/dist/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Docker
+.dockerignore
+Dockerfile
+docker-compose*.yml
+.env.example
+
+# CI/CD
+.github/
+
+# Scripts (not needed in container)
+scripts/install.sh
+scripts/install.ps1
+scripts/build.sh
+scripts/build.ps1
+scripts/build-frontend.sh
+scripts/build-frontend.ps1
+scripts/api-test.sh
+scripts/api-test.ps1
+
+# Config (will be mounted or copied selectively)
+configs/server.yaml.local
+configs/nginx-local-generated.conf
+
+# SSL certificates
+ssl/
+*.pem
+*.crt
+*.key

@@ -21,13 +21,14 @@ type ServerConfig struct {
 }
 
 type DatabaseConfig struct {
-	Type string `yaml:"type"` // sqlite, postgres, mysql
-	Path string `yaml:"path"` // For SQLite
-	Host string `yaml:"host"`
-	Port int    `yaml:"port"`
-	Name string `yaml:"name"`
-	User string `yaml:"user"`
-	Pass string `yaml:"password"`
+	Type     string `yaml:"type"`     // sqlite3, postgres, sqlserver
+	Path     string `yaml:"path"`     // For SQLite
+	Host     string `yaml:"host"`     // For PostgreSQL/SQL Server
+	Port     int    `yaml:"port"`     // For PostgreSQL/SQL Server
+	Name     string `yaml:"name"`     // Database name
+	User     string `yaml:"user"`     // Username
+	Password string `yaml:"password"` // Password
+	SSLMode  string `yaml:"sslmode"`  // For PostgreSQL (disable, require, verify-ca, verify-full)
 }
 
 type GitConfig struct {
