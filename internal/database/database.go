@@ -17,6 +17,7 @@ type Config struct {
 	SSLMode  string // For PostgreSQL
 }
 
+// DB is the global database connection
 var DB *sql.DB
 
 // Init initializes the database connection

@@ -7,6 +7,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// Config represents the application configuration
 type Config struct {
 	Server   ServerConfig   `yaml:"server"`
 	Database DatabaseConfig `yaml:"database"`
@@ -14,12 +15,14 @@ type Config struct {
 	Security SecurityConfig `yaml:"security"`
 }
 
+// ServerConfig holds server-specific configuration
 type ServerConfig struct {
 	Host string `yaml:"host"`
 	Port int    `yaml:"port"`
 	Mode string `yaml:"mode"` // debug, release
 }
 
+// DatabaseConfig holds database connection configuration
 type DatabaseConfig struct {
 	Type     string `yaml:"type"`     // sqlite3, postgres, sqlserver
 	Path     string `yaml:"path"`     // For SQLite
@@ -31,6 +34,7 @@ type DatabaseConfig struct {
 	SSLMode  string `yaml:"sslmode"`  // For PostgreSQL (disable, require, verify-ca, verify-full)
 }
 
+// GitConfig holds Git repository configuration
 type GitConfig struct {
 	RepoPath     string   `yaml:"repo_path"`
 	MaxRepoSize  int64    `yaml:"max_repo_size"` // in MB
@@ -38,6 +42,7 @@ type GitConfig struct {
 	AllowedTypes []string `yaml:"allowed_types"` // file extensions
 }
 
+// SecurityConfig holds security-related configuration
 type SecurityConfig struct {
 	JWTSecret     string `yaml:"jwt_secret"`
 	JWTExpiration int    `yaml:"jwt_expiration"` // in hours
@@ -46,6 +51,7 @@ type SecurityConfig struct {
 	SSHPort       int    `yaml:"ssh_port"`
 }
 
+// GlobalConfig is the application-wide configuration instance
 var GlobalConfig *Config
 
 // Load loads configuration from file

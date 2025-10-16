@@ -16,10 +16,14 @@ import (
 )
 
 var (
+	// ErrInvalidCredentials is returned when username or password is incorrect
 	ErrInvalidCredentials = errors.New("invalid username or password")
-	ErrUserExists         = errors.New("user already exists")
-	ErrUserNotFound       = errors.New("user not found")
-	ErrInvalidToken       = errors.New("invalid token")
+	// ErrUserExists is returned when trying to create a user that already exists
+	ErrUserExists = errors.New("user already exists")
+	// ErrUserNotFound is returned when a user cannot be found
+	ErrUserNotFound = errors.New("user not found")
+	// ErrInvalidToken is returned when a token is invalid or expired
+	ErrInvalidToken = errors.New("invalid token")
 )
 
 // JWTClaims represents JWT token claims
